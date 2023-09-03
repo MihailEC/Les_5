@@ -40,17 +40,23 @@ menu = {
     9: 'играть в викторину',
     10: 'мой банковский счет',
     11: 'смена рабочей директории',
-    12: 'выход'
+    12: 'вызов списка команд',
+    13: 'выход'
 }
-keys_menu = list(menu.keys())
 
-print('Добро пожаловать в файловый менеджер.')
-print('Команды:')
-for i in range(len(menu)):
-    print(f'{keys_menu[i]}. {menu[i + 1]}')
+
+def menu_print():
+    keys_menu = list(menu.keys())
+
+    print('Добро пожаловать в файловый менеджер.')
+    print('Команды:')
+    for i in range(len(menu)):
+        print(f'{keys_menu[i]}. {menu[i + 1]}')
+
+
+menu_print()
 print()
 print(f'Текущая директория: {os.getcwd()}')
-
 
 while True:
     ctr = int(input('Введите пункт команды: '))
@@ -67,23 +73,51 @@ while True:
         except FileNotFoundError:
             print('Файл не найден. Возврат в главное меню.\n')
     elif ctr == 3:
-        pass
+        name_copy_src = input('Введите имя копируемого объекта (example.txt для файла): ')
+        name_copy_dst = input('Введите путь папки назначения: ')
+        try:
+            if os.path.isdir(name_copy_src):
+                shutil.copytree(name_copy_src, name_copy_dst)
+            else:
+                shutil.copy(name_copy_src, name_copy_dst)
+        except FileNotFoundError:
+            print('Файл не найден. Возврат в главное меню.\n')
     elif ctr == 4:
-        pass
+        work_dir = os.listdir(os.getcwd())
+        for i in range(len(work_dir)):
+            print(work_dir[i])
+        print()
     elif ctr == 5:
-        pass
+        work_dir = os.listdir(os.getcwd())
+        print(f'Список папок в директории {os.getcwd()}:')
+        for i in range(len(work_dir)):
+            if os.path.isdir(work_dir[i]):
+                print(work_dir[i])
+        print()
     elif ctr == 6:
-        pass
+        work_dir = os.listdir(os.getcwd())
+        print(f'Список файлов в директории {os.getcwd()}:')
+        for i in range(len(work_dir)):
+            if os.path.isfile(work_dir[i]):
+                print(work_dir[i])
+        print()
     elif ctr == 7:
-        pass
+        print('Ваша операционная система:')
+        print(f'{sys.platform}\n')
     elif ctr == 8:
-        pass
+        print('Программу написал: Екимов М.С.\n')
     elif ctr == 9:
-        pass
+        victorina()
     elif ctr == 10:
-        pass
+        bank_cash()
     elif ctr == 11:
-        pass
+        try:
+            os.chdir(input('Введите имя директории: '))
+        except FileNotFoundError:
+            print('Папка не найдена. Возврат в главное меню.\n')
+        print(f'Текущая директория: {os.getcwd()}')
+    elif ctr == 12:
+        menu_print()
     elif ctr == 12:
         break
     else:
