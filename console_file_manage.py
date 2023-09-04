@@ -23,10 +23,9 @@
 import os
 import shutil
 import sys
-from os import mkdir, remove, rmdir, listdir
-from shutil import copy
 from victory import victorina
 from bank_cash import bank_cash
+from time import ctime
 
 menu = {
     1: 'создать папку',
@@ -35,13 +34,14 @@ menu = {
     4: 'просмотр содержимого рабочей директории',
     5: 'посмотреть только папки',
     6: 'посмотреть только файлы',
-    7: 'просмотр информации об операционной системе',
-    8: 'создатель программы',
-    9: 'играть в викторину',
-    10: 'мой банковский счет',
-    11: 'смена рабочей директории',
-    12: 'вызов списка команд',
-    13: 'выход'
+    7: 'получить информацию об объекте',
+    8: 'просмотр информации об операционной системе',
+    9: 'создатель программы',
+    10: 'играть в викторину',
+    11: 'мой банковский счет',
+    12: 'смена рабочей директории',
+    13: 'вызов списка команд',
+    14: 'выход'
 }
 
 
@@ -54,39 +54,64 @@ def menu_print():
         print(f'{keys_menu[i]}. {menu[i + 1]}')
 
 
+def get_dir_size(path='.'):
+    total = 0
+    with os.scandir(path) as it:
+        for p in it:
+            if p.is_file():
+                total += p.stat().st_size
+            elif p.is_dir():
+                total += get_dir_size(p.path)
+    return total
+
+
+def get_size(path='.'):
+    if os.path.isfile(path):
+        return os.path.getsize(path)
+    elif os.path.isdir(path):
+        return get_dir_size(path)
+
+
 menu_print()
 print()
 print(f'Текущая директория: {os.getcwd()}')
 
 while True:
-    ctr = int(input('Введите пункт команды: '))
+    ctr = int(input('Введите пункт команды (пункт 13 - список команд): '))
     if ctr == 1:
         name_new_dir = input('Введите имя новой папки: ')
-        mkdir(name_new_dir)
+        if not os.path.exists(name_new_dir):
+            os.mkdir(name_new_dir)
+            print('Папка успешно создана! Возврат в главное меню.\n')
+        else:
+            print('Папка уже существует. Возврат в главное меню.\n')
     elif ctr == 2:
         name_del = input('Введите имя удаляемого объекта (example.txt для файла): ')
         try:
             if os.path.isdir(name_del):
                 shutil.rmtree(name_del)
+                print('Папка удалена! Возврат в главное меню.\n')
             else:
                 os.remove(name_del)
+                print('Файл удален! Возврат в главное меню.\n')
         except FileNotFoundError:
             print('Файл не найден. Возврат в главное меню.\n')
     elif ctr == 3:
-        name_copy_src = input('Введите имя копируемого объекта (example.txt для файла): ')
-        name_copy_dst = input('Введите путь папки назначения: ')
+        name_copy_src = os.path.basename(input('Введите имя копируемого объекта (example.txt для файла): '))
+        name_copy_dst = os.path.basename(input('Введите путь назначения: '))
         try:
             if os.path.isdir(name_copy_src):
                 shutil.copytree(name_copy_src, name_copy_dst)
             else:
-                shutil.copy(name_copy_src, name_copy_dst)
+                shutil.copy(os.path.abspath(name_copy_src), os.path.abspath(name_copy_dst))
+                print('Файл скопирован успешно! Возврат в главное меню.\n')
         except FileNotFoundError:
             print('Файл не найден. Возврат в главное меню.\n')
     elif ctr == 4:
         work_dir = os.listdir(os.getcwd())
         for i in range(len(work_dir)):
             print(work_dir[i])
-        print()
+        print('Список содержимого выведен. Возврат в главное меню.\n')
     elif ctr == 5:
         work_dir = os.listdir(os.getcwd())
         print(f'Список папок в директории {os.getcwd()}:')
@@ -102,52 +127,39 @@ while True:
                 print(work_dir[i])
         print()
     elif ctr == 7:
+        info_obj = os.path.join(os.getcwd(), input('Введите имя или путь объекта (example.txt для файла): '))
+        try:
+            info_ctime = os.path.getctime(info_obj)
+            size = get_size(path=info_obj)
+            if os.path.isdir(info_obj):
+                name_obj = 'Папка'
+            else:
+                name_obj = 'Файл'
+            print(f'Размер {name_obj}: {size} байт. Дата создания: {ctime(info_ctime)}\n')
+        except FileNotFoundError:
+            print('Путь не найден. Возврат в главное меню.\n')
+    elif ctr == 8:
         print('Ваша операционная система:')
         print(f'{sys.platform}\n')
-    elif ctr == 8:
-        print('Программу написал: Екимов М.С.\n')
+        print('Возврат в главное меню.\n')
     elif ctr == 9:
-        victorina()
+        print('Программу написал: Екимов М.С.\n')
     elif ctr == 10:
-        bank_cash()
+        victorina()
+        print('Возврат в файловый менеджер.\n')
     elif ctr == 11:
+        bank_cash()
+        print('Возврат в файловый менеджер.\n')
+    elif ctr == 12:
+        print(f'Текущая директория: {os.getcwd()}')
         try:
-            os.chdir(input('Введите имя директории: '))
+            os.chdir(os.path.join(os.getcwd(), input('Введите путь до директории: ')))
         except FileNotFoundError:
             print('Папка не найдена. Возврат в главное меню.\n')
         print(f'Текущая директория: {os.getcwd()}')
-    elif ctr == 12:
+    elif ctr == 13:
         menu_print()
-    elif ctr == 12:
+    elif ctr == 14:
         break
     else:
         print('Неверный пункт меню!')
-
-# mkdir('test')
-# directory = os.getcwd()
-# print(directory)
-# # Разделение на папки и файлы. Можно папки и файлы сохранить в отдельные списки
-# # разделение, сортировку и вывод можно убрать в функцию
-# list_dir = os.listdir(directory)
-# dict_dir = []
-# for d in range(len(list_dir)):
-#     if os.path.isdir(list_dir[d]):
-#         # print('Папка: ', list_dir[d])
-#         dict_dir.append('Папка: ' + list_dir[d])
-#     else:
-#         # print('Файл: ', list_dir[d])
-#         dict_dir.append('Файл: ' + list_dir[d])
-# # сортировка файлов и папок по алфавиту
-# dict_dir.sort()
-# print(dict_dir)
-# # вывод отсортированных файлов и папок. Строку в условии можно заменить на переменную.
-# for d in range(len(dict_dir)):
-#     if 'Файл' in dict_dir[d]:
-#         print(dict_dir[d])
-#
-# print(sys.platform)
-#
-# os.chdir(input('Введите путь: '))
-# directory = os.getcwd()
-# print(directory)
-# # print(os.path.isdir('bank_cash.py'))
