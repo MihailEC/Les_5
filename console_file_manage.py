@@ -23,56 +23,12 @@
 import os
 import shutil
 import sys
+import apps
 from victory import victorina
-from bank_cash import bank_cash
+from apps import bank_cash
 from time import ctime
 
-menu = {
-    1: 'создать папку',
-    2: 'удалить (файл/папку)',
-    3: 'копировать (файл/папку)',
-    4: 'просмотр содержимого рабочей директории',
-    5: 'посмотреть только папки',
-    6: 'посмотреть только файлы',
-    7: 'получить информацию об объекте',
-    8: 'просмотр информации об операционной системе',
-    9: 'создатель программы',
-    10: 'играть в викторину',
-    11: 'мой банковский счет',
-    12: 'смена рабочей директории',
-    13: 'вызов списка команд',
-    14: 'выход'
-}
-
-
-def menu_print():
-    keys_menu = list(menu.keys())
-
-    print('Добро пожаловать в файловый менеджер.')
-    print('Команды:')
-    for i in range(len(menu)):
-        print(f'{keys_menu[i]}. {menu[i + 1]}')
-
-
-def get_dir_size(path='.'):
-    total = 0
-    with os.scandir(path) as it:
-        for p in it:
-            if p.is_file():
-                total += p.stat().st_size
-            elif p.is_dir():
-                total += get_dir_size(p.path)
-    return total
-
-
-def get_size(path='.'):
-    if os.path.isfile(path):
-        return os.path.getsize(path)
-    elif os.path.isdir(path):
-        return get_dir_size(path)
-
-
-menu_print()
+apps.menu_print()
 print()
 print(f'Текущая директория: {os.getcwd()}')
 
@@ -130,7 +86,7 @@ while True:
         info_obj = os.path.join(os.getcwd(), input('Введите имя или путь объекта (example.txt для файла): '))
         try:
             info_ctime = os.path.getctime(info_obj)
-            size = get_size(path=info_obj)
+            size = apps.get_size(path=info_obj)
             if os.path.isdir(info_obj):
                 name_obj = 'Папка'
             else:
@@ -158,7 +114,7 @@ while True:
             print('Папка не найдена. Возврат в главное меню.\n')
         print(f'Текущая директория: {os.getcwd()}')
     elif ctr == 13:
-        menu_print()
+        apps.menu_print()
     elif ctr == 14:
         break
     else:
