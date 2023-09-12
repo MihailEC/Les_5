@@ -44,38 +44,46 @@ def get_size(path='.'):
     elif os.path.isdir(path):
         return get_dir_size(path)
 
-def refill(cash):
+def refill(cash, cash_up):
     """
     Функция банковского приложения. Добавляет к указанному счету сумму введенную пользователем.
     :param cash: Счет пользователя
     :return: возвращает увеличенный счет пользователя
     """
-    cash_up = int(input('Введите сумму пополнения: '))
     if cash_up > 0:
         cash = cash + cash_up
         print('Счет пополнен.')
         return cash
     else:
         print('Неверное значение суммы!\n')
-        pass
+        return cash
 
 
-def buy(cash, buy_price):
+
+def buy(cash, history_buy):
     """
-    Функция банковского приложения. Вычитает из счета пользователя сумму покупки.
-    :param cash: Счет пользователя
-    :param buy_price: Сумма покупки
-    :return: Возвращает измененный счет пользователя
+    функция покупки. Выполняет списание со счета и запись в историю покупок.
+    :param cash: передается счет пользователя
+    :param history_buy: передается список истории покупок
+    :return: возвращает измененный счет пользователя
     """
+    buy_price = int(input('Введите сумму покупки: '))
     if buy_price > 0:
         if buy_price > cash:
             print('Недостаточно средств на счете')
-            pass
+            return cash
         else:
+            name_buy = input('Введите название покупки: ')
             cash = cash - buy_price
+            history_buy.append((name_buy, buy_price))
+            print(f'Остаток средств: {cash}\n')
             return cash
     else:
-        print('Сумма покупки не может быть отрицательной или равняться нулю!\n')
+        print('Сумма покупки не может быть отрицательной или равняться нулю!/n')
+        return cash
+
+
+
 
 
 def bank_cash():
@@ -94,21 +102,18 @@ def bank_cash():
         choice = input('Выберите пункт меню: ')
         if choice == '1':
             try:
-                cash = refill(cash)
+                cash_up = int(input('Введите сумму пополнения: '))
+                cash = refill(cash, cash_up)
                 print(f'Сумма на счету: {cash}\n')
             except ValueError:
                 print('Введите число!\n')
                 pass
         elif choice == '2':
-            buy_price = int(input('Введите сумму покупки: '))
             try:
-                cash = buy(cash, buy_price)
-                name_buy = input('Введите название покупки: ')
-                history_buy.append([name_buy, buy_price])
-                print(f'Покупка совершена. Остаток средств: {cash}\n')
+                cash = buy(cash, history_buy)
             except ValueError:
                 print('Введите число!\n')
-                pass
+                cash = buy(cash, history_buy)
         elif choice == '3':
             for el in history_buy:
                 print('-'.join(map(str, el)))

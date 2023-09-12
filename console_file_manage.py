@@ -24,8 +24,7 @@ import os
 import shutil
 import sys
 import apps
-from victory import victorina
-from apps import bank_cash
+from apps import bank_cash, victorina
 from time import ctime
 
 apps.menu_print()
