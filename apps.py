@@ -3,29 +3,15 @@ import random
 import os
 
 
-def menu_print(menu):
-    # menu = {
-    #     1: 'создать папку',
-    #     2: 'удалить (файл/папку)',
-    #     3: 'копировать (файл/папку)',
-    #     4: 'просмотр содержимого рабочей директории',
-    #     5: 'посмотреть только папки',
-    #     6: 'посмотреть только файлы',
-    #     7: 'получить информацию об объекте',
-    #     8: 'просмотр информации об операционной системе',
-    #     9: 'создатель программы',
-    #     10: 'играть в викторину',
-    #     11: 'мой банковский счет',
-    #     12: 'смена рабочей директории',
-    #     13: 'вызов списка команд',
-    #     14: 'выход'
-    # }
-
+def transform_dict_list(menu):
+    """
+    Функция преобразования словаря в список ключ.значение.
+    :param menu: на входе словарь keys-пункты меню, value-описание выполнения
+    :return: список с элементами из строк ключ.значение
+    """
     keys_menu = list(menu.keys())
-    print('Добро пожаловать в файловый менеджер.')
-    print('Команды:')
-    for i in range(len(menu)):
-        print(f'{keys_menu[i]}. {menu[i + 1]}')
+    result = [f'{keys_menu[i]}. {menu[i + 1]}' for i in range(len(menu))]
+    return result
 
 
 def get_dir_size(path='.'):
@@ -45,34 +31,43 @@ def get_size(path='.'):
     elif os.path.isdir(path):
         return get_dir_size(path)
 
-def dirs_work_print():
-    work_dir = os.listdir(os.getcwd())
-    print(f'Список папок в директории {os.getcwd()}:')
-    for i in range(len(work_dir)):
-        if os.path.isdir(work_dir[i]):
-            print(work_dir[i])
 
-def files_work_print():
+def dirs_work_list():
+    """
+    Функция определения директорий в рабочей папке
+    :return: список директорий в папке
+    """
     work_dir = os.listdir(os.getcwd())
-    print(f'Список файлов в директории {os.getcwd()}:')
-    for i in range(len(work_dir)):
-        if os.path.isfile(work_dir[i]):
-            print(work_dir[i])
+    list_result = [work_dir[i] for i in range(len(work_dir)) if os.path.isdir(work_dir[i])]
+    return list_result
+
+
+def files_work_list():
+    """
+    Функция определения файлов в рабочей директории
+    :return: список файлов в директории
+    """
+    work_dir = os.listdir(os.getcwd())
+    list_result = [work_dir[i] for i in range(len(work_dir)) if os.path.isfile(work_dir[i])]
+    return list_result
+
 
 def save_listdir():
+    """
+    Сохраняет в файл listdir.txt строку с файлами и строку с папками.
+    :return:
+    """
     work_dir = os.listdir(os.getcwd())
     dirs = []
     files = []
     for i in range(len(work_dir)):
-        if os.path.isdir(work_dir[i]):
-            dirs.append(work_dir[i])
-        else:
-            files.append(work_dir[i])
+        dirs.append(work_dir[i]) if os.path.isdir(work_dir[i]) else files.append(work_dir[i])
     dirs = ', '.join(dirs)
     files = ', '.join(files)
     with open('listdir.txt', 'w', encoding='utf-8') as f:
         f.write(f'dirs: {dirs}\n')
         f.write(f'files: {files}')
+
 
 def refill(cash, cash_up):
     """
@@ -85,7 +80,7 @@ def refill(cash, cash_up):
         print('Счет пополнен.')
         return cash
     else:
-        print('Неверное значение суммы!\n')
+        print('Сумма не может быть отрицательной!\n')
         return cash
 
 
@@ -140,11 +135,11 @@ def bank_cash():
         if choice == '1':
             try:
                 cash_up = int(input('Введите сумму пополнения: '))
-                cash = refill(cash, cash_up)
-                print(f'Сумма на счету: {cash}\n')
             except ValueError:
                 print('Введите число!\n')
-                pass
+            else:
+                cash = refill(cash, cash_up)
+                print(f'Сумма на счету: {cash}\n')
         elif choice == '2':
             try:
                 cash = buy(cash, history_buy)

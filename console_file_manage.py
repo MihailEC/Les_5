@@ -1,27 +1,4 @@
-"""
-1. Создать новый проект ""Консольный файловый менеджер"
-2. В проекте реализовать следующий функционал:
-После запуска программы пользователь видит меню, состоящее из следующих пунктов:
-- создать папку; # реализуем с помощью os.mkdir
-- удалить (файл/папку); # реализуем с помощью os.remove и shutil.rmtree
-- копировать (файл/папку); # реализуем с помощью shutil.copy и
-- просмотр содержимого рабочей директории; # реализуем с помощью os.list.dir
-- посмотреть только папки; # реализуем с помощью os.path.isdir
-- посмотреть только файлы; # реализуем с помощью os.path.isdir
-- просмотр информации об операционной системе; # реализуем с помощью sys.platform
-- создатель программы;
-- играть в викторину;
-- мой банковский счет;
-- смена рабочей директории (*необязательный пункт); # реализуем с помощью os.chdir
-- выход.
-Так же можно добавить любой дополнительный функционал по желанию.
-
-Используются функции из модуля ОС: mkdir, remove, rmdir, listdir
-Используются функции из модуля shutil: copy
-
-"""
 import os, shutil, sys, apps
-from apps import bank_cash, victorina
 from time import ctime
 
 menu = {
@@ -42,9 +19,10 @@ menu = {
     15: 'выход'
 }
 
-apps.menu_print(menu)
-print()
-print(f'Текущая директория: {os.getcwd()}')
+print('Добро пожаловать в файловый менеджер.\nКоманды:')
+for item in apps.transform_dict_list(menu):
+    print(item)
+print(f'\nТекущая директория: {os.getcwd()}')
 
 while True:
     ctr = int(input('Введите пункт команды (пункт 14 - список команд): '))
@@ -86,10 +64,14 @@ while True:
         apps.save_listdir()
         print()
     elif ctr == 6:
-        apps.dirs_work_print()
+        print(f'Список папок в директории {os.getcwd()}:')
+        for item in apps.dirs_work_list():
+            print(item)
         print()
     elif ctr == 7:
-        apps.files_work_print()
+        print(f'Список файлов в директории {os.getcwd()}:')
+        for item in apps.files_work_list():
+            print(item)
         print()
     elif ctr == 8:
         info_obj = os.path.join(os.getcwd(), input('Введите имя или путь объекта (example.txt для файла): '))
@@ -104,16 +86,14 @@ while True:
         except FileNotFoundError:
             print('Путь не найден. Возврат в главное меню.\n')
     elif ctr == 9:
-        print('Ваша операционная система:')
-        print(f'{sys.platform}\n')
-        print('Возврат в главное меню.\n')
+        print(f'\nВаша операционная система: {sys.platform} \nВозврат в главное меню.\n')
     elif ctr == 10:
-        print('Программу написал: Екимов М.С.\n')
+        print('\nАвтор программы: Екимов М.С.\n')
     elif ctr == 11:
-        victorina()
+        apps.victorina()
         print('Возврат в файловый менеджер.\n')
     elif ctr == 12:
-        bank_cash()
+        apps.bank_cash()
         print('Возврат в файловый менеджер.\n')
     elif ctr == 13:
         print(f'Текущая директория: {os.getcwd()}')
@@ -123,7 +103,8 @@ while True:
             print('Папка не найдена. Возврат в главное меню.\n')
         print(f'Текущая директория: {os.getcwd()}')
     elif ctr == 14:
-        apps.menu_print(menu)
+        for item in apps.transform_dict_list(menu):
+            print(item)
     elif ctr == 15:
         break
     else:
