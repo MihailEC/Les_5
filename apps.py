@@ -1,24 +1,25 @@
+import json
 import random
 import os
 
 
-def menu_print():
-    menu = {
-        1: 'создать папку',
-        2: 'удалить (файл/папку)',
-        3: 'копировать (файл/папку)',
-        4: 'просмотр содержимого рабочей директории',
-        5: 'посмотреть только папки',
-        6: 'посмотреть только файлы',
-        7: 'получить информацию об объекте',
-        8: 'просмотр информации об операционной системе',
-        9: 'создатель программы',
-        10: 'играть в викторину',
-        11: 'мой банковский счет',
-        12: 'смена рабочей директории',
-        13: 'вызов списка команд',
-        14: 'выход'
-    }
+def menu_print(menu):
+    # menu = {
+    #     1: 'создать папку',
+    #     2: 'удалить (файл/папку)',
+    #     3: 'копировать (файл/папку)',
+    #     4: 'просмотр содержимого рабочей директории',
+    #     5: 'посмотреть только папки',
+    #     6: 'посмотреть только файлы',
+    #     7: 'получить информацию об объекте',
+    #     8: 'просмотр информации об операционной системе',
+    #     9: 'создатель программы',
+    #     10: 'играть в викторину',
+    #     11: 'мой банковский счет',
+    #     12: 'смена рабочей директории',
+    #     13: 'вызов списка команд',
+    #     14: 'выход'
+    # }
 
     keys_menu = list(menu.keys())
     print('Добро пожаловать в файловый менеджер.')
@@ -44,38 +45,71 @@ def get_size(path='.'):
     elif os.path.isdir(path):
         return get_dir_size(path)
 
-def refill(cash):
+def dirs_work_print():
+    work_dir = os.listdir(os.getcwd())
+    print(f'Список папок в директории {os.getcwd()}:')
+    for i in range(len(work_dir)):
+        if os.path.isdir(work_dir[i]):
+            print(work_dir[i])
+
+def files_work_print():
+    work_dir = os.listdir(os.getcwd())
+    print(f'Список файлов в директории {os.getcwd()}:')
+    for i in range(len(work_dir)):
+        if os.path.isfile(work_dir[i]):
+            print(work_dir[i])
+
+def save_listdir():
+    work_dir = os.listdir(os.getcwd())
+    dirs = []
+    files = []
+    for i in range(len(work_dir)):
+        if os.path.isdir(work_dir[i]):
+            dirs.append(work_dir[i])
+        else:
+            files.append(work_dir[i])
+    dirs = ', '.join(dirs)
+    files = ', '.join(files)
+    with open('listdir.txt', 'w', encoding='utf-8') as f:
+        f.write(f'dirs: {dirs}\n')
+        f.write(f'files: {files}')
+
+def refill(cash, cash_up):
     """
     Функция банковского приложения. Добавляет к указанному счету сумму введенную пользователем.
     :param cash: Счет пользователя
     :return: возвращает увеличенный счет пользователя
     """
-    cash_up = int(input('Введите сумму пополнения: '))
     if cash_up > 0:
         cash = cash + cash_up
         print('Счет пополнен.')
         return cash
     else:
         print('Неверное значение суммы!\n')
-        pass
+        return cash
 
 
-def buy(cash, buy_price):
+def buy(cash, history_buy):
     """
-    Функция банковского приложения. Вычитает из счета пользователя сумму покупки.
-    :param cash: Счет пользователя
-    :param buy_price: Сумма покупки
-    :return: Возвращает измененный счет пользователя
+    функция покупки. Выполняет списание со счета и запись в историю покупок.
+    :param cash: передается счет пользователя
+    :param history_buy: передается список истории покупок
+    :return: возвращает измененный счет пользователя
     """
+    buy_price = int(input('Введите сумму покупки: '))
     if buy_price > 0:
         if buy_price > cash:
             print('Недостаточно средств на счете')
-            pass
+            return cash
         else:
+            name_buy = input('Введите название покупки: ')
             cash = cash - buy_price
+            history_buy.append((name_buy, buy_price))
+            print(f'Остаток средств: {cash}\n')
             return cash
     else:
-        print('Сумма покупки не может быть отрицательной или равняться нулю!\n')
+        print('Сумма покупки не может быть отрицательной или равняться нулю!/n')
+        return cash
 
 
 def bank_cash():
@@ -83,8 +117,19 @@ def bank_cash():
     Банковское приложение. Не имеет входных и выходных параметров.
     :return: Выводится меню по которому следует пользователь.
     """
-    cash = 0
+    # Введение списка для истории покупок
     history_buy = []
+    # чтение суммы на счету из файла
+    if os.path.exists('cash.txt'):
+        with open('cash.txt', 'r', encoding='utf-8') as f:
+            cash = int(f.read())
+    else:
+        cash = 0
+    # чтение истории покупок из файла
+    if os.path.exists('history.txt'):
+        with open('history.txt', 'r', encoding='utf-8') as f:
+            history_buy = json.load(f)
+    # тело программы (цикл с меню)
     while True:
         print('1. пополнение счета')
         print('2. покупка')
@@ -94,34 +139,35 @@ def bank_cash():
         choice = input('Выберите пункт меню: ')
         if choice == '1':
             try:
-                cash = refill(cash)
+                cash_up = int(input('Введите сумму пополнения: '))
+                cash = refill(cash, cash_up)
                 print(f'Сумма на счету: {cash}\n')
             except ValueError:
                 print('Введите число!\n')
                 pass
         elif choice == '2':
-            buy_price = int(input('Введите сумму покупки: '))
             try:
-                cash = buy(cash, buy_price)
-                name_buy = input('Введите название покупки: ')
-                history_buy.append([name_buy, buy_price])
-                print(f'Покупка совершена. Остаток средств: {cash}\n')
+                cash = buy(cash, history_buy)
             except ValueError:
                 print('Введите число!\n')
-                pass
+                cash = buy(cash, history_buy)
         elif choice == '3':
             for el in history_buy:
                 print('-'.join(map(str, el)))
             print()
             pass
         elif choice == '4':
+            with open('cash.txt', 'w', encoding='utf-8') as f:
+                f.write(f'{cash}')
+            with open('history.txt', 'w', encoding='utf-8') as f:
+                json.dump(history_buy, f)
             break
         else:
             print('Неверный пункт меню')
 
 
 def victorina():
-    # Входные данные в формате строки
+    # Входные данные в формате словаря
 
     born_date = {
         'Менделеев Д.И.': '08.02.1834',
@@ -176,7 +222,8 @@ def victorina():
                 count_good = count_good + 1
             else:
                 question_date = born_date[question_name[j]].split('.')
-                print(f'Дата рождения неверна. Верный ответ: {days[question_date[0]]} {month[question_date[1]]} {question_date[2]} года.')
+                print(
+                    f'Дата рождения неверна. Верный ответ: {days[question_date[0]]} {month[question_date[1]]} {question_date[2]} года.')
 
         # Подсчет и вывод количества верных и неверных ответов
         # count_bad = count_persons - count_good
@@ -184,6 +231,7 @@ def victorina():
         print(f'Количество неправильных ответов - {count_good - count_persons}')
         choice = input('Начать викторину занаво? (Да/Нет): ')
 
+
 if __name__ == '__main__':
     bank_cash()
-    victorina()
+    # victorina()
